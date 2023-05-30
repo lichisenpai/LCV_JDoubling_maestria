@@ -105,7 +105,6 @@ def exp_noise (xx, yy, r1, r2):
     #print('solo ruido: ',only_noise)
     return only_noise #return an array with only signal noise
 
-
 def central_signal (yy, xx, r2, r1):
     aa = np.array(yy)
     ss = np.array(xx) #shape: (1000,)
@@ -126,7 +125,6 @@ def central_signal (yy, xx, r2, r1):
     #plt.show()
     return only_noise #return an array with only signal noise
 
-
 def Noise (a, b):
     original = a
     noise = b
@@ -141,7 +139,6 @@ def Noise (a, b):
     print("El maximo es: ", maxim)
     print("La relación señal ruido es: ", s_n)
     return mse, rmse, s_n
-
 
 def aplicar(x, y, m):
     # El tama;o de x tiene que ser del tama;o de y mas m
@@ -213,10 +210,8 @@ def Armonics (x, integ):
         print("subarmonico no confirmado")
         return 0
     
-
 #señal = multiplet(1200, 1, 3.0, 1)
 #archiv_txt(señal[0], señal[1])
-
 
 yy, a, b = leer_archivo('SeñalesExperimentales/ha_08.slc')
 
