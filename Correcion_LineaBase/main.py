@@ -2,10 +2,15 @@
 
 # Entry point for the program
 
-from signal import Signal, gen_random_signal
+#%%
+from nmrsignal import Signal, gen_random_signal
 from baselinefit import baseline_flattening
 
-signal = gen_random_signal(10, 0, 1000, -50, 50)
-#print(signal)
+import matplotlib.pyplot as plt
+
+signal = gen_random_signal(1000, 0, 1000, -50, 50)
+plt.plot(signal.x_values, signal.y_values, color="gray")
 baseline_flattening(signal)
-print(signal)
+plt.plot(signal.x_values, signal.y_values, color="green")
+plt.plot([signal.x_values[0], signal.x_values[-1]], [signal.y_values[0], signal.y_values[-1]], color="red")
+plt.show()
