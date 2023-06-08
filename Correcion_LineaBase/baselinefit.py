@@ -5,7 +5,7 @@ The algorithm implemented here is an adapted version of:
 """
 #NOTE: check out https://stackoverflow.com/questions/29156532/python-baseline-correction-library
 
-import signal.Signal
+from signal import Signal
 import math
 import numpy as np
 from numpy.polynomial import Polynomial
@@ -28,12 +28,6 @@ def calculate_sigma(y_values, previous_sigma):
     denominator = 1 + np.sum([heaviside(U_PARAMETER * previous_sigma - abs(y)) for y in y_values])
     return np.sqrt(numerator / denominator)
 
-#def calculate_first_sigma(y_values):
-#    """Calculates the sigma for the case where the previous sigma would have been infinity"""
-#    numerator = np.sum([y**2 for y in y_values])
-#    denominator = 1 + np.sum([1 for y in y_values])
-#    return np.sqrt(numerator / denominator)
-
 def filter_within_bounds(values, lower, upper):
     """Returns a list where all the values are within the upper and lower bound"""
     return list( filter( lambda x: x > lower and x < upper, values))
@@ -55,10 +49,10 @@ def baseline_flattening(source: Signal):
             next_sigma = calculate_sigma(y_values_within, old_sigma)
         # fitting curve
         points_within_v = zip(source.x_values, source.y_values)
-        points_within_v = filter(lambda p: p[1] > -V_PARAMETER*old_sigma and p[1] < V_PARAMETER*old_sigma, points_within_v) 
+        points_within_v = list(filter(lambda p: p[1] > -V_PARAMETER*old_sigma and p[1] < V_PARAMETER*old_sigma, points_within_v))
         fitted_polynomial = Polynomial.fit([p[0] for p in points_within_v], [p[1] for p in points_within_v], 8)
         # Substracting fitted curve to original signal
-        source.y_values = list(map(lambda i: source.y_values[i] - fitted_polynomial(source.x_values[i])), range(0, len(source.y_values)))
+        source.y_values = list(map(lambda i: source.y_values[i] - fitted_polynomial(source.x_values[i]), range(0, len(source.y_values))))
         # Deciding if the correction was negligible
         # |g(x)| < 0.125 * next_sigma for all x
         is_correction_negligible = True

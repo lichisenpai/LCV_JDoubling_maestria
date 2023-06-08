@@ -1,5 +1,6 @@
 """Represent signals output by an NMR system"""
 
+import random
 import numpy as np
 
 class Signal:
@@ -15,7 +16,7 @@ class Signal:
         self.x_values = [self.min_hertz + x*point_gap for x in range(0,self.point_count)]
        
     def __str__(self):
-        return f"min: {self.min_hertz}    max: {self.max_hertz}\n{self.y_values}"
+        return f"min: {self.min_hertz}    max: {self.max_hertz}\nx:{self.x_values}\ny:{self.y_values}"
 
     @staticmethod
     def leer_archivo(nombre):
@@ -34,3 +35,18 @@ class Signal:
                 yy[i] = (float(contenido[i+3]))
             
             return Signal(yy, float(a), float(b))
+
+def gen_random_signal(point_count, min_start_height, max_start_height, min_jump, max_jump):
+    """Generates a random signal that looks like an nmr produced signal"""
+    x_coords = list(range(0,point_count))
+    y_coords = []
+
+    for x in range(0, len(x_coords)):
+        if x==0:
+            y_coords.append(random.randrange(min_start_height, max_start_height))
+        else:
+            next_y = random.randrange(min_jump, max_jump)
+            next_y += y_coords[x-1]
+            y_coords.append(next_y)
+
+    return Signal(y_coords, 0, len(x_coords))
