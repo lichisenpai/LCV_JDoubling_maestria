@@ -1,16 +1,20 @@
 [tool.poetry]
 name = "lcv-jdoubling-maestria"
 version = "0.1.0"
-description = "NMR signal prediction using neural nets"
-authors = []
+description = ""
+authors = ["angelAlk <angelalk@ciencias.unam.mx>"]
 readme = "README.md"
 packages = [{include = "lcv_jdoubling_maestria"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "3.8.10"
+nmrsim = "^0.6.0.post1"
+numpy = "1.23.*"
 matplotlib = "^3.7.1"
-numpy = "^1.25.0"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.23.2"
 
 [build-system]
 requires = ["poetry-core"]
