@@ -1,0 +1,24 @@
+# each row is a signal
+# The columns are: calc, Error, SubHarmonics, DistHz, S_n, Error2, signalWidth
+# 
+# calc := J outputed by jdoubling
+# Error:= diff between theorical expected J and calc
+# Error2 := quadratic error  <---- possibly useless
+# SubHarmonics := second minimum on integral graph when read right to left
+# DistHz := Distance between the first and second minimum in the integral graph
+## reminder, the first minimum is the J itself
+# S_n := signal to noise ratio
+# signalWidth := Width of the signal in hertz
+
+
+# neural nets:
+# inputs -> calc, SubHarmonics, DistHz, s_n, signalWidth
+# outputs -> Error (float)
+
+# SVM:
+# inputs -> s_N, calc
+# output -> boolean , noise quantifying limit (ie, can we trust the Jdoubling results) 
+
+# Gaussian process
+# inputs -> SubHarmonics, DistHz, s_n, signalWidth
+# output -> calc, confidence (num)
