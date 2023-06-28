@@ -12,8 +12,8 @@ class Signal:
         self.max_hertz = max_hertz_value
         # Assumes that the y_values were taken uniformly over the hertz range
         self.point_count = len(y_values)
-        point_gap = (self.max_hertz - min_hertz_value) / self.point_count
-        self.x_values = [self.min_hertz + x*point_gap for x in range(0,self.point_count)]
+        self.gap = (self.max_hertz - min_hertz_value) / self.point_count
+        self.x_values = [self.min_hertz + x*self.gap for x in range(0,self.point_count)]
        
     def __str__(self):
         return f"min: {self.min_hertz}    max: {self.max_hertz}\nx:{self.x_values}\ny:{self.y_values}"

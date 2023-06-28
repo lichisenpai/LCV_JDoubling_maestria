@@ -2,7 +2,7 @@
 # The columns are: calc, Error, SubHarmonics, DistHz, S_n, Error2, signalWidth
 # 
 # calc := J outputed by jdoubling
-# Error:= diff between theorical expected J and calc
+# Error:= diff between theoretical expected J and calc
 # Error2 := quadratic error  <---- possibly useless
 # SubHarmonics := second minimum on integral graph when read right to left
 # DistHz := Distance between the first and second minimum in the integral graph
