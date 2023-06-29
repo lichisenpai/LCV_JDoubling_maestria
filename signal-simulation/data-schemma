@@ -1,6 +1,7 @@
 # each row is a signal
 # The columns are: calc, Error, SubHarmonics, DistHz, S_n, Error2, signalWidth
 # 
+# theoretical J := J defined by us
 # calc := J outputed by jdoubling
 # Error:= diff between theoretical expected J and calc
 # Error2 := quadratic error  <---- possibly useless
