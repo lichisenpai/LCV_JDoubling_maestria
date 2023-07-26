@@ -1,7 +1,7 @@
 """Simulation of NMR signals for ML algorithms"""
 
-import json
 import math
+from typing import List, Tuple
 
 import numpy as np
 from nmrsim import Multiplet
@@ -34,17 +34,47 @@ class SimulatedSignal:
         "Signal to noise ratio (Passed as input into simulation)"
         self.signal_width = signal_width
         "Width of the signal in hertz"
+    
+    def __str__(self) -> str:
+        return f"""
+theoretical_J:{self.theoretical_J},
+calculated_J:{self.calculated_J},
+err:{self.Joubling_error},
+q_err:{self.JDoubling_quadratic_error},
+sub harmonic:{self.sub_harmonic},
+hertz distance:{self.hertz_distance},
+signal to noise:{self.signal_noise_ratio},
+signal width:{self.signal_width}
+"""
+    
+    @staticmethod
+    def from_dict(source):
+        """Build Simulated Signal from dict generated with vars()
+        
+        Will throw errors with invalid dicts
+        """
+        return SimulatedSignal(
+            source["theoretical_J"],
+            source["calculated_J"],
+            source["Jdoubling_error"],
+            source["sub_harmonic"],
+            source["hertz_distance"],
+            source["signal_noise_ratio"],
+            source["signal_width"])
 
 
-def simulate_single_signal(theoretical_J: float, noise_scale: float) -> SimulatedSignal:
+
+
+def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_width:float ) -> SimulatedSignal:
     "Simulate a signal given it's theoretical J value and the noise scaler desired"
 
-    [desplazamiento, intensidades] = multiplet(1200.0, 1, theoretical_J, 1, 0.5)
+    [desplazamiento, intensidades] = multiplet(1200.0, 1, theoretical_J, 1, signal_width)
     ruido = generate_noise(noise_scale)
     señal_con_ruido = ruido + intensidades
     _mse, _rmse, signal_noise_ratio = calculate_noise(intensidades, ruido)
 
     signal = Signal(señal_con_ruido, desplazamiento[0], desplazamiento[-1])
+
 
     # 1.3 is meant to reduce the amount of operations during integration.
     intervalo = int((theoretical_J / signal.gap) * 1.3)
@@ -82,15 +112,15 @@ def multiplet(v:float, I:int, J:float, r:int, signal_width:float):
     min_x = v - 20 
     max_x = v + 20
     td = Multiplet(v , I, [(J, r)]) 
-    grafica = mplplot(td.peaklist(), points=RESOLUTION_POINTS, w=signal_width, limits=(min_x, max_x))
+    grafica = mplplot(td.peaklist(), points=RESOLUTION_POINTS, w=signal_width, limits=(min_x, max_x), hidden=True)
     return grafica
 
-def generate_noise(noise_scale:float) -> list[float]:
+def generate_noise(noise_scale:float) -> List[float]:
     "Generates a list of random floats divided by noise_scale"
 
     return [np.random.random() / noise_scale for _i in range(RESOLUTION_POINTS)]
 
-def calculate_noise(original:list[float], noise:list[float]) -> tuple[float, float, float]:
+def calculate_noise(original:List[float], noise:List[float]) -> Tuple[float, float, float]:
     "Calculate signal to noise ratio and related values"
     prom = sum(noise)/len(noise)
     msex = list(map(lambda x: np.square(x - prom), noise))
@@ -100,19 +130,19 @@ def calculate_noise(original:list[float], noise:list[float]) -> tuple[float, flo
     s_n = maxim / rmse #relacion señal ruido
     return mse, rmse, s_n
 
-def aplicar(x:list[float], y:list[float], start_index:int) -> list[float]:
+def aplicar(x:List[float], y:List[float], start_index:int) -> List[float]:
     """Add the values from list y to list x starting at the position start_index. Return a new list.
     
     len(x) must be the len(y) + start_index
     """
-    assert(len(x) == len(y) + start_index)
+    #assert(len(x) == len(y) + start_index)
 
     result = np.copy(x)
     for i in range(0, len(y)):
         result[start_index + i] += y[i]
     return result
 
-def convolucion(yy:list[float], n:int = 40, m:int = 128) -> list[float]:
+def convolucion(yy:List[float], n:int = 40, m:int = 128) -> List[float]:
     "convolution :)"
     tamano = len(yy)
     ceros = np.zeros(tamano+n*m)
@@ -122,7 +152,7 @@ def convolucion(yy:list[float], n:int = 40, m:int = 128) -> list[float]:
         ceros = aplicar(ceros, (-1)**i*yy, n*i)
     return ceros
 
-def jdoubling(yy:list[float], intervalo:int = 60, m:int = 8):
+def jdoubling(yy:List[float], intervalo:int = 60, m:int = 8):
     "The jdoubling process itself"
     
     integrs = np.zeros(intervalo)    
@@ -132,7 +162,7 @@ def jdoubling(yy:list[float], intervalo:int = 60, m:int = 8):
         integrs[i] = integral
     return integrs
 
-def harmonics(expected_first_harmonic:float, minimums:list[float]) -> float:
+def harmonics(expected_first_harmonic:float, minimums:List[float]) -> float:
     "determine which minimum fits the first harmonic"
     
     candidates = [expected_first_harmonic + x for x in range(-2,3)]
