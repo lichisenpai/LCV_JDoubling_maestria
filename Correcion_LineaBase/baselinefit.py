@@ -5,7 +5,7 @@ The algorithm implemented here is an adapted version of:
 """
 #NOTE: check out https://stackoverflow.com/questions/29156532/python-baseline-correction-library
 
-from nmrsignal import Signal
+from .nmrsignal import Signal
 import math
 import numpy as np
 from numpy.polynomial import Polynomial

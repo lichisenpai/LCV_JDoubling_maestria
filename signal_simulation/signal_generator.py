@@ -1,14 +1,17 @@
 """Simulation of NMR signals for ML algorithms"""
 
 import math
+import random
 from typing import List, Tuple
 
 import numpy as np
 from nmrsim import Multiplet
-from nmrsim.plt import mplplot
+from nmrsim.math import add_lorentzians
 from scipy.signal import argrelextrema
+from matplotlib import pyplot as plt
 
-from Correcion_LineaBase.nmrsignal import Signal
+from Correcion_LineaBase.nmrsignal import Signal, gen_random_signal
+from Correcion_LineaBase.baselinefit import baseline_flattening
 
 
 class SimulatedSignal:
@@ -22,7 +25,7 @@ class SimulatedSignal:
         "J value passed as input into the simulation"
         self.calculated_J = calculated_J
         "J value calculated by the JDoubling algorithm (First minimum on integral graph)"
-        self.Joubling_error = JDoubling_error
+        self.Jdoubling_error = JDoubling_error
         "Difference between the calculated J value and the J input into simulation"
         self.JDoubling_quadratic_error = JDoubling_error ** 2
         "Squared JDoubling error"
@@ -39,13 +42,16 @@ class SimulatedSignal:
         return f"""
 theoretical_J:{self.theoretical_J},
 calculated_J:{self.calculated_J},
-err:{self.Joubling_error},
+err:{self.Jdoubling_error},
 q_err:{self.JDoubling_quadratic_error},
 sub harmonic:{self.sub_harmonic},
 hertz distance:{self.hertz_distance},
 signal to noise:{self.signal_noise_ratio},
 signal width:{self.signal_width}
 """
+
+    def __repr__(self) -> str:
+        return str(self)
     
     @staticmethod
     def from_dict(source):
@@ -63,18 +69,17 @@ signal width:{self.signal_width}
             source["signal_width"])
 
 
-
-
 def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_width:float ) -> SimulatedSignal:
     "Simulate a signal given it's theoretical J value and the noise scaler desired"
 
     [desplazamiento, intensidades] = multiplet(1200.0, 1, theoretical_J, 1, signal_width)
-    ruido = generate_noise(noise_scale)
-    señal_con_ruido = ruido + intensidades
-    _mse, _rmse, signal_noise_ratio = calculate_noise(intensidades, ruido)
+    base_signal = Signal(intensidades, desplazamiento[0], desplazamiento[-1])
 
-    signal = Signal(señal_con_ruido, desplazamiento[0], desplazamiento[-1])
-
+    #Simulating instrumental noise and subsequent flattening
+    signal = simulate_instrumental_noise(base_signal, noise_scale)
+    noise_points = np.array(signal.y_values) - np.array(base_signal.y_values)
+    _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, noise_points)
+    baseline_flattening(signal)
 
     # 1.3 is meant to reduce the amount of operations during integration.
     intervalo = int((theoretical_J / signal.gap) * 1.3)
@@ -111,14 +116,19 @@ def multiplet(v:float, I:int, J:float, r:int, signal_width:float):
 
     min_x = v - 20 
     max_x = v + 20
-    td = Multiplet(v , I, [(J, r)]) 
-    grafica = mplplot(td.peaklist(), points=RESOLUTION_POINTS, w=signal_width, limits=(min_x, max_x), hidden=True)
-    return grafica
+    td = Multiplet(v , I, [(J, r)])
 
-def generate_noise(noise_scale:float) -> List[float]:
-    "Generates a list of random floats divided by noise_scale"
+    # BIG change below, from reading the source of nmrsim it seems that the commented line
+    # is equivalent to the block below, but without using matplotlib at all
+    # (which makes sense since we shouldn't need a plotter for simulation)
+    # grafica = mplplot(td.peaklist(), points=RESOLUTION_POINTS, w=signal_width, limits=(min_x, max_x), hidden=True)
 
-    return [np.random.random() / noise_scale for _i in range(RESOLUTION_POINTS)]
+    # MODIFIED FROM nmrsim's SOURCE
+    peaklist = td.peaklist()
+    peaklist.sort()
+    x = np.linspace(min_x, max_x, RESOLUTION_POINTS)
+    y = add_lorentzians(x, peaklist, signal_width)
+    return x, y
 
 def calculate_noise(original:List[float], noise:List[float]) -> Tuple[float, float, float]:
     "Calculate signal to noise ratio and related values"
@@ -127,7 +137,7 @@ def calculate_noise(original:List[float], noise:List[float]) -> Tuple[float, flo
     mse = sum(msex)/(len(noise) - 1)
     rmse = pow(mse, 0.5) #la raiz cuadrada del anterior
     maxim = max(original)# nos da el maximo de la simulacion original
-    s_n = maxim / rmse #relacion señal ruido
+    s_n = float('inf') if rmse == 0 else maxim / rmse#relacion señal ruido
     return mse, rmse, s_n
 
 def aplicar(x:List[float], y:List[float], start_index:int) -> List[float]:
@@ -171,3 +181,25 @@ def harmonics(expected_first_harmonic:float, minimums:List[float]) -> float:
             if math.isclose(c,m):
                 return c
     return 0
+
+def simulate_instrumental_noise(base: Signal, noise_scale:float) -> Signal:
+    """Given a signal add another random signal to it,  simulating the noise produced by nmr instruments"""
+    noise_x = base.x_values
+    max_noise_height = max(base.y_values)
+    max_jump = max_noise_height * noise_scale
+
+    noise_y = []
+    for x in range(len(noise_x)):
+        if x==0:
+            if math.isclose(0.0, noise_scale):
+                noise_y.append(0)
+            else:
+                noise_y.append(random.uniform(-max_noise_height, max_noise_height))
+        else:
+            next_y = random.uniform(-max_jump, max_jump)
+            next_y += noise_y[-1]
+            noise_y.append(next_y)
+
+    new_y = np.add(base.y_values, noise_y)
+    
+    return Signal(new_y, base.min_hertz, base.max_hertz)

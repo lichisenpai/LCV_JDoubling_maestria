@@ -43,9 +43,9 @@ def gen_random_signal(point_count, min_start_height, max_start_height, min_jump,
 
     for x in range(0, len(x_coords)):
         if x==0:
-            y_coords.append(random.randrange(min_start_height, max_start_height))
+            y_coords.append(random.uniform(min_start_height, max_start_height))
         else:
-            next_y = random.randrange(min_jump, max_jump)
+            next_y = random.uniform(min_jump, max_jump)
             next_y += y_coords[x-1]
             y_coords.append(next_y)
 
