@@ -12,6 +12,8 @@ nmrsim = "^0.6.0.post1"
 numpy = "1.23.*"
 matplotlib = "^3.7.1"
 tensorflow = "^2.13.0"
+pandas = "^2.0.3"
+sklearn = "^0.0.post7"
 
 
 [tool.poetry.group.dev.dependencies]
