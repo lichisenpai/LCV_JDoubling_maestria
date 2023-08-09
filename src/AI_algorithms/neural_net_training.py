@@ -10,21 +10,21 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from .data_normalization import normalize_training_data, Normalizer
+from data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../assets/example_db.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/example_db.json")
 PLS_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/nn-dimensional-projection.pkl")
 NEURAL_NET_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/lichi-net.keras")
 
 
 def save_pls_model(model):
     serialized_model = pickle.dumps(model)
-    with open(PLS_MODEL_FILENAME, mode="w") as file:
+    with open(PLS_MODEL_FILENAME, mode="wb") as file:
         file.write(serialized_model)
 
 def load_pls_model():
-    with open(PLS_MODEL_FILENAME, mode="r") as file:
+    with open(PLS_MODEL_FILENAME, mode="rb") as file:
         serialized = file.read()
         return pickle.loads(serialized)
 

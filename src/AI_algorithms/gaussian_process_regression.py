@@ -12,7 +12,7 @@ import tensorflow as tf
 from .data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../assets/example_db.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/example_db.json")
 PLS_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/gpr-dimensional-projection.pkl")
 GPR_MODEL_DIR = path.join(CURRENT_DIR, "udata/lichi-gpr/")
 
