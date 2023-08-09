@@ -1,4 +1,4 @@
-"""A SVM to predict using just noise to signal ratio and the Jdoubling output wether the jdoubling output is reliable"""
+"""An SVM to predict whether Jdoubling's output is reliable using signal_to_noise_ratio and the Jdoubling output"""
 import pickle
 from os import path
 
@@ -11,17 +11,17 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/example_db.json")
-SVM_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/lichi-svm.pkl")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/old-undergrad-db.json")
+SVM_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/svm-model.pkl")
 
 
 def save_svm_model(model):
     serialized_model = pickle.dumps(model)
-    with open(SVM_MODEL_FILENAME, mode="w") as file:
+    with open(SVM_MODEL_FILENAME, mode="wb") as file:
         file.write(serialized_model)
 
 def load_svm_model():
-    with open(SVM_MODEL_FILENAME, mode="r") as file:
+    with open(SVM_MODEL_FILENAME, mode="rb") as file:
         serialized = file.read()
         return pickle.loads(serialized)
 
@@ -44,14 +44,14 @@ if __name__ == "__main__":
        return x * 1.05 
     
     #haciendo limpieza de los datos
-    dataset_clean = dataset.loc[dataset.loc[:, '1Subharmonic'] != 0.0] #quitando los valores cuando subarmonico dif a cero 
-    dataset_clean['Max_acept'] = dataset_clean['Jref'].apply(max_aceptado)
-    dataset_clean['Min_acept'] = dataset_clean['Jref'].apply(min_aceptado)
+    dataset_clean = dataset.loc[dataset.loc[:, 'sub_harmonic'] != 0.0] #quitando los valores cuando subarmonico dif a cero 
+    dataset_clean['Max_acept'] = dataset_clean['theoretical_J'].apply(max_aceptado)
+    dataset_clean['Min_acept'] = dataset_clean['theoretical_J'].apply(min_aceptado)
     
     print("Dataset limpio\n", dataset_clean.tail())
     
     # define your data
-    X = dataset_clean[['S/n', 'Jdet']]
+    X = dataset_clean[['signal_noise_ratio', 'calculated_J']]
     #Y = dataset_clean['Cluster'] = [0 if s >= 0.15 or a <= 100 else 1 for s, a in zip(X['Error'], X['S/n'])]
     condiciones = [(dataset_clean.Jdet >= dataset_clean.Max_acept) & (dataset_clean.Jdet <= dataset_clean.Min_acept), 
                    (dataset_clean.Jdet < dataset_clean.Max_acept) & (dataset_clean.Jdet > dataset_clean.Min_acept)]
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     Y = dataset_clean['Cluster'] = np.select(condiciones, elecciones, -1)
     #Grafica
     colores = ["#00cc44", "#ff0000"]   # Green & Red 
-    plt.scatter(X['S/n'], X['Jdet'], c=np.take(colores, Y), s=10)
+    plt.scatter(X['signal_noise_ratio'], X['calculated_J'], c=np.take(colores, Y), s=10)
     plt.xlabel("S/n ratio")
     plt.ylabel("Jdet (Hz)")
     
@@ -94,8 +94,8 @@ if __name__ == "__main__":
     # Representación gráfica de los límites de clasificación
     
     # Grid de valores
-    x = np.linspace(np.min(train_dataset['S/n']), np.max(train_dataset['S/n']), 50)
-    y = np.linspace(np.min(train_dataset['Jdet']), np.max(train_dataset['Jdet']), 50)
+    x = np.linspace(np.min(train_dataset['signal_noise_ratio']), np.max(train_dataset['signal_noise_ratio']), 50)
+    y = np.linspace(np.min(train_dataset['calculated_J']), np.max(train_dataset['calculated_J']), 50)
     Y, X = np.meshgrid(y, x)
     grid = np.vstack([X.ravel(), Y.ravel()]).T
     
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     
     fig, ax = plt.subplots(figsize=(12,8))
     #ax.scatter(grid[:,0], grid[:,1], c=pred_grid, alpha = 0.2)
-    ax.scatter(train_dataset['S/n'], train_dataset['Jdet'], c=train_labels, alpha = 1, s =9)
+    ax.scatter(train_dataset['signal_noise_ratio'], train_dataset['calculated_J'], c=train_labels, alpha = 1, s =9)
     
     # Vectores soporte
     ax.scatter(
