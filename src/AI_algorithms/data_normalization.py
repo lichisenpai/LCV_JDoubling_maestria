@@ -18,8 +18,11 @@ def normalize_training_data(input_db_path):
     desc = dataset.describe()
     desc = desc.transpose()
 
-    normalize = lambda x:(x - desc["mean"]/desc["std"])
-    normalized_data = normalize(dataset)
+    for col in dataset:
+        if desc["std"][col] != 0:
+            dataset[col] = (dataset[col] - desc["mean"][col]) / desc["std"][col]
+
+    normalized_data = dataset
 
     with open(NORMALIZED_CONSTANTS_FILE, "wb") as f:
         serialized = pickle.dumps((desc["mean"], desc["std"]))
@@ -39,4 +42,7 @@ class Normalizer:
         self.std = std
         
     def normalize_row(self, r):
-        return (r - self.mean)/self.std
+        if self.std == 0:
+            return r
+        else:
+            return (r - self.mean)/self.std
