@@ -39,7 +39,8 @@ def baseline_flattening(source: Signal):
     """
 
     is_correction_negligible = False
-    while not is_correction_negligible:
+    iterations = 0 # added iterations to ensure non convergent examples don't stop the system
+    while not is_correction_negligible and iterations < 100:
         #sigma convergence loop
         old_sigma = 0.0
         next_sigma = float("inf")
@@ -58,3 +59,4 @@ def baseline_flattening(source: Signal):
         is_correction_negligible = True
         for x in source.x_values:
             is_correction_negligible = is_correction_negligible and abs(fitted_polynomial(x)) < 0.125 * next_sigma
+        iterations += 1
