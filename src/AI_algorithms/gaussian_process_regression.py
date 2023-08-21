@@ -1,5 +1,5 @@
-import pickle
 from os import path
+import pickle
 
 import pandas as pd 
 import matplotlib.pyplot as plt
@@ -9,7 +9,7 @@ import gpflow #probablemente tengas que instalarlo manualmente con !pip install 
 from gpflow.utilities import print_summary
 import tensorflow as tf
 
-from .data_normalization import normalize_training_data, Normalizer
+from data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
 INPUT_DB = path.join(CURRENT_DIR, "../../assets/example_db.json")
@@ -18,11 +18,11 @@ GPR_MODEL_DIR = path.join(CURRENT_DIR, "udata/lichi-gpr/")
 
 def save_pls_model(model):
     serialized_model = pickle.dumps(model)
-    with open(PLS_MODEL_FILENAME, mode="w") as file:
+    with open(PLS_MODEL_FILENAME, mode="wb") as file:
         file.write(serialized_model)
 
 def load_pls_model():
-    with open(PLS_MODEL_FILENAME, mode="r") as file:
+    with open(PLS_MODEL_FILENAME, mode="rb") as file:
         serialized = file.read()
         return pickle.loads(serialized)
 
@@ -66,7 +66,8 @@ if __name__ == "__main__":
     def get_sample_size(data_size: int) -> int:
         z = 1.96
         e = 0.02
-        return (z**2 * data_size * 0.5 * 0.5) / (e**2 * (data_size - 1) + 0.5 * 0.5)
+        res = (z**2 * data_size * 0.5 * 0.5) / (e**2 * (data_size - 1) + 0.5 * 0.5)
+        return int(res)
 
     sample_size = get_sample_size(len(X_transformed))
 

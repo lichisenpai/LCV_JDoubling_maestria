@@ -11,7 +11,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/old-undergrad-db.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/example_db.json")
 SVM_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/svm-model.pkl")
 
 
@@ -53,8 +53,8 @@ if __name__ == "__main__":
     # define your data
     X = dataset_clean[['signal_noise_ratio', 'calculated_J']]
     #Y = dataset_clean['Cluster'] = [0 if s >= 0.15 or a <= 100 else 1 for s, a in zip(X['Error'], X['S/n'])]
-    condiciones = [(dataset_clean.Jdet >= dataset_clean.Max_acept) & (dataset_clean.Jdet <= dataset_clean.Min_acept), 
-                   (dataset_clean.Jdet < dataset_clean.Max_acept) & (dataset_clean.Jdet > dataset_clean.Min_acept)]
+    condiciones = [(dataset_clean.calculated_J >= dataset_clean.Max_acept) & (dataset_clean.calculated_J <= dataset_clean.Min_acept), 
+                   (dataset_clean.calculated_J < dataset_clean.Max_acept) & (dataset_clean.calculated_J > dataset_clean.Min_acept)]
     
     elecciones = np.array((0, 1), dtype="int8")
     Y = dataset_clean['Cluster'] = np.select(condiciones, elecciones, -1)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
                )
     print("")
     print(f"El accuracy de test es: {100*accuracy}%")
-    
+
     # Matriz de confusión de las predicciones de test
     confusion_matrix = pd.crosstab(
         test_labels.ravel(),

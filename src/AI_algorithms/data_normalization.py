@@ -1,4 +1,5 @@
 "Data normalization for the training database"
+import copy
 import pickle
 from os import path
 
@@ -10,7 +11,6 @@ def normalize_training_data(input_db_path):
     """Normalizes data with respect to mean and std-dev, stores both variables
     for later inference.
     """
-    
     dataset = pd.read_json(input_db_path)
 
     dataset = dataset.loc[dataset.loc[:, 'sub_harmonic'] != 0.0] #quitando los valores cuando subarmonico dif a cero 
@@ -42,7 +42,8 @@ class Normalizer:
         self.std = std
         
     def normalize_row(self, r):
-        if self.std == 0:
-            return r
-        else:
-            return (r - self.mean)/self.std
+        new_row = copy.deepcopy(r)
+        for col in r:
+            if self.std[col] != 0:
+                new_row[col] = (r[col] - self.mean[col])/self.std[col]
+        return new_row

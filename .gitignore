@@ -1,3 +1,4 @@
 programs/
 __pycache__/
 src/AI_algorithms/udata/*
+assets/_*
