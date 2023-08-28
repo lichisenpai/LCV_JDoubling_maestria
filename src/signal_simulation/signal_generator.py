@@ -78,15 +78,14 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
     #Simulating instrumental noise and subsequent flattening
     signal = simulate_instrumental_noise(base_signal, noise_scale)
     noise_points = np.array(signal.y_values) - np.array(base_signal.y_values)
-    _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, noise_points)
     baseline_flattening(signal)
+    _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, signal.y_values - base_signal.y_values)
 
     # 1.3 is meant to reduce the amount of operations during integration.
     intervalo = int((theoretical_J / signal.gap) * 1.3)
     m = 164 # number of delta functions used
 
     integrs = jdoubling(signal.y_values, intervalo, m)
-
     # We found that 7 works best for finding the right minimum values on the integral graph
     busqueda = int(intervalo/7)
     minimosR = argrelextrema(integrs, np.less, order=busqueda, mode= 'wrap')[0]#busca el minimo mas minimo
@@ -100,7 +99,7 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
 
     calculated_J = minimosR[-1] * signal.gap
 
-    return SimulatedSignal(theoretical_J, calculated_J, theoretical_J - calculated_J, subarmosHz, calculated_J - subarmosHz, signal_noise_ratio, signal.max_hertz - signal.min_hertz)
+    return SimulatedSignal(theoretical_J, calculated_J, theoretical_J - calculated_J, subarmosHz, calculated_J - subarmosHz, signal_noise_ratio, signal_width)
 
 # The amount of sample points that we take from the simulated signal
 RESOLUTION_POINTS = 1000
@@ -165,7 +164,7 @@ def convolucion(yy:List[float], n:int = 40, m:int = 128) -> List[float]:
 def jdoubling(yy:List[float], intervalo:int = 60, m:int = 8):
     "The jdoubling process itself"
     
-    integrs = np.zeros(intervalo)    
+    integrs = np.zeros(intervalo)
     for i in range(1, intervalo):
         y_new = convolucion(yy, i, m)
         integral = sum(abs(y_new))
