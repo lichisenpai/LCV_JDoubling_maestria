@@ -202,3 +202,11 @@ def simulate_instrumental_noise(base: Signal, noise_scale:float) -> Signal:
     new_y = np.add(base.y_values, noise_y)
     
     return Signal(new_y, base.min_hertz, base.max_hertz)
+
+def simulate_old_noise(signal: Signal, noise_scale:float) -> Signal:
+    new_y_vals = []
+    for _ in signal.x_values:
+        new_y_vals.append(random.random() / noise_scale)
+
+    new_y = np.add(signal.y_values, new_y_vals)
+    return Signal(new_y, signal.min_hertz, signal.max_hertz)

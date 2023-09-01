@@ -1,4 +1,5 @@
 programs/
 __pycache__/
 src/AI_algorithms/udata/*
+!src/AI_algorithms/udata/.gitkeep
 assets/_*
