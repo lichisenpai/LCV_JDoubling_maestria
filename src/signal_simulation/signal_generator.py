@@ -78,7 +78,7 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
     #Simulating instrumental noise and subsequent flattening
     signal = simulate_instrumental_noise(base_signal, noise_scale)
     noise_points = np.array(signal.y_values) - np.array(base_signal.y_values)
-    baseline_flattening(signal)
+    baseline_flattening(signal)##ENSURE FLATTENING MAKES SENSE
     _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, signal.y_values - base_signal.y_values)
 
     # 1.3 is meant to reduce the amount of operations during integration.

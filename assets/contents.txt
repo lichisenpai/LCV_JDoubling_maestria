@@ -1,0 +1,5 @@
+example_db  <- Example of the database used for training
+original    <- Original simulated database, before major rewrite (Graduate)
+old_noise-no_flat   <- simulated database using basic noise and no baseline-flattening
+old_noise-flat      <- simulated database using basic noise and baseline-flattening
+new_noise-flat      <- simulated database using "polynomial-like" noise and baseline-flattening
