@@ -51,10 +51,7 @@ def generate_database(name: str):
         print(f"Simulating {len(parameters)} different signals")
 
         signals_db_asy = pool.imap_unordered(wrapper, parameters)
-        # Progress bar
-        #signals_db = tqdm(signals_db_asy, total=len(parameters))
-        signals_db = status(signals_db_asy, len(parameters))
-
+        signals_db = status(signals_db_asy, len(parameters))# Progress bar
         signals_db = pool.map(vars, signals_db)
 
     with open(OUTPUT_DB_FILE, "w", encoding="utf-8") as out_file:

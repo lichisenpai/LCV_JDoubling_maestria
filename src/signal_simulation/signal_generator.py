@@ -20,15 +20,17 @@ class SimulatedSignal:
     The goal of this class is to act as a single instance for the Neural net training.
     """
 
-    def __init__(self, theoretical_J: float, calculated_J: float, JDoubling_error: float, sub_harmonic: float, hertz_distance: float, signal_noise_ratio: float, signal_width: float):
+    def __init__(self, theoretical_J: float, calculated_J: float, JDoubling_error: float, has_harmonic:bool, sub_harmonic: float, hertz_distance: float, signal_noise_ratio: float, signal_width: float):
         self.theoretical_J = theoretical_J
         "J value passed as input into the simulation"
         self.calculated_J = calculated_J
         "J value calculated by the JDoubling algorithm (First minimum on integral graph)"
-        self.Jdoubling_error = JDoubling_error
+        self.JDoubling_error = JDoubling_error
         "Difference between the calculated J value and the J input into simulation"
         self.JDoubling_quadratic_error = JDoubling_error ** 2
         "Squared JDoubling error"
+        self.has_harmonic = has_harmonic
+        "Whether a sub_harmonic could be found. If false then the value of sub_harmonic is meaningless"
         self.sub_harmonic = sub_harmonic
         "Second minimum on the integral graph"
         self.hertz_distance = hertz_distance
@@ -44,6 +46,7 @@ theoretical_J:{self.theoretical_J},
 calculated_J:{self.calculated_J},
 err:{self.Jdoubling_error},
 q_err:{self.JDoubling_quadratic_error},
+has_harmonic:{self.has_harmonic},
 sub harmonic:{self.sub_harmonic},
 hertz distance:{self.hertz_distance},
 signal to noise:{self.signal_noise_ratio},
@@ -63,6 +66,7 @@ signal width:{self.signal_width}
             source["theoretical_J"],
             source["calculated_J"],
             source["Jdoubling_error"],
+            source["has_harmonic"],
             source["sub_harmonic"],
             source["hertz_distance"],
             source["signal_noise_ratio"],
@@ -76,9 +80,8 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
     base_signal = Signal(intensidades, desplazamiento[0], desplazamiento[-1])
 
     #Simulating instrumental noise and subsequent flattening
-    signal = simulate_instrumental_noise(base_signal, noise_scale)
-    noise_points = np.array(signal.y_values) - np.array(base_signal.y_values)
-    baseline_flattening(signal)##ENSURE FLATTENING MAKES SENSE
+    signal = simulate_old_noise(base_signal, noise_scale)
+    #baseline_flattening(signal)##ENSURE FLATTENING MAKES SENSE
     _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, signal.y_values - base_signal.y_values)
 
     # 1.3 is meant to reduce the amount of operations during integration.
@@ -90,16 +93,20 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
     busqueda = int(intervalo/7)
     minimosR = argrelextrema(integrs, np.less, order=busqueda, mode= 'wrap')[0]#busca el minimo mas minimo
     minimos = argrelextrema(integrs, np.less, mode='wrap')[0] #me da todos los minimos con ruido
+    calculated_J = minimosR[-1] * signal.gap
 
     # Searching for the first subharmonic value, we know that it must be around J/3
     armonic1 = int((minimosR[-1])/3)
-    # NOTE: !! Harmonics may return 0 if the value could not be found.
     subarmos= harmonics(armonic1, minimos)
-    subarmosHz = subarmos * signal.gap
+    if subarmos == None:
+        # Could not find first subharmonic
+        subarmosHz = 0
+        has_harmonic = False
+    else:
+        subarmosHz = subarmos * signal.gap
+        has_harmonic = True
 
-    calculated_J = minimosR[-1] * signal.gap
-
-    return SimulatedSignal(theoretical_J, calculated_J, theoretical_J - calculated_J, subarmosHz, calculated_J - subarmosHz, signal_noise_ratio, signal_width)
+    return SimulatedSignal(theoretical_J, calculated_J, theoretical_J - calculated_J, has_harmonic, subarmosHz, calculated_J - subarmosHz, signal_noise_ratio, signal_width)
 
 # The amount of sample points that we take from the simulated signal
 RESOLUTION_POINTS = 1000
@@ -179,7 +186,7 @@ def harmonics(expected_first_harmonic:float, minimums:List[float]) -> float:
         for m in minimums:
             if math.isclose(c,m):
                 return c
-    return 0
+    return None
 
 def simulate_instrumental_noise(base: Signal, noise_scale:float) -> Signal:
     """Given a signal add another random signal to it,  simulating the noise produced by nmr instruments"""
