@@ -44,7 +44,7 @@ class SimulatedSignal:
         return f"""
 theoretical_J:{self.theoretical_J},
 calculated_J:{self.calculated_J},
-err:{self.Jdoubling_error},
+err:{self.JDoubling_error},
 q_err:{self.JDoubling_quadratic_error},
 has_harmonic:{self.has_harmonic},
 sub harmonic:{self.sub_harmonic},
@@ -81,8 +81,13 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
 
     #Simulating instrumental noise and subsequent flattening
     signal = simulate_old_noise(base_signal, noise_scale)
-    #baseline_flattening(signal)##ENSURE FLATTENING MAKES SENSE
+    baseline_flattening(signal)
     _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, signal.y_values - base_signal.y_values)
+
+    plt.plot(base_signal.x_values, base_signal.y_values, color='#ff0000')
+    plt.plot(signal.x_values, signal.y_values, color='#00ffff')
+    plt.show()
+    print(structural_similarity_index(signal, base_signal))
 
     # 1.3 is meant to reduce the amount of operations during integration.
     intervalo = int((theoretical_J / signal.gap) * 1.3)
@@ -188,28 +193,6 @@ def harmonics(expected_first_harmonic:float, minimums:List[float]) -> float:
                 return c
     return None
 
-def simulate_instrumental_noise(base: Signal, noise_scale:float) -> Signal:
-    """Given a signal add another random signal to it,  simulating the noise produced by nmr instruments"""
-    noise_x = base.x_values
-    max_noise_height = max(base.y_values)
-    max_jump = max_noise_height * noise_scale
-
-    noise_y = []
-    for x in range(len(noise_x)):
-        if x==0:
-            if math.isclose(0.0, noise_scale):
-                noise_y.append(0)
-            else:
-                noise_y.append(random.uniform(-max_noise_height, max_noise_height))
-        else:
-            next_y = random.uniform(-max_jump, max_jump)
-            next_y += noise_y[-1]
-            noise_y.append(next_y)
-
-    new_y = np.add(base.y_values, noise_y)
-    
-    return Signal(new_y, base.min_hertz, base.max_hertz)
-
 def simulate_old_noise(signal: Signal, noise_scale:float) -> Signal:
     new_y_vals = []
     for _ in signal.x_values:
@@ -217,3 +200,27 @@ def simulate_old_noise(signal: Signal, noise_scale:float) -> Signal:
 
     new_y = np.add(signal.y_values, new_y_vals)
     return Signal(new_y, signal.min_hertz, signal.max_hertz)
+
+def structural_similarity_index(measured_signal: Signal, simulated_signal: Signal) -> float:
+    """Gives a measure of the uniformity of the spectrum as compared to a simulated measurement
+    
+    Described in a newer baseline-fitting paper by Gerald A. Pearson. Who also designed the
+    fitting algorithm we use.
+    A value of SSIM=1 indicates that the two signals are identical
+    """
+
+    #Need
+    # X = real measurement
+    # Y = simulated
+    # mean of a signal
+    # std-dev of a signal
+    # (2mxmy)(2sXY) / (mx**2  + my**2)(sX**2 + sY**2) - c
+    # 2\sigma_{XY} means -> 2*np.cov(X,Y)[0][1]
+    # c = SSIM(Y,Y) with c=0
+    mean_x = np.mean(measured_signal.y_values)
+    stddev_x = np.std(measured_signal.y_values)
+    mean_y = np.mean(simulated_signal.y_values)
+    stddev_y = np.std(simulated_signal.y_values)
+    covariance = np.cov(measured_signal.y_values, simulated_signal.y_values)[0][1]
+
+    return (2 * mean_x * mean_y * 2 * covariance) / ((mean_x**2 + mean_y**2)*(stddev_x**2 + stddev_y**2))

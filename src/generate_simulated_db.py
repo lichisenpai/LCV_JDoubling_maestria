@@ -23,31 +23,18 @@ def status(iterable, total_size):
         print(f"\r{processed_count} out of {total_size}\t{percentage}%", end="", flush=True)
         yield i
 
-def adjusted_noise_scale_parameters(count):
-    """Generates noise_scales that produce good signal_noise ratios after simulation.
-
-    The closer the noise_scales are to 0 the better their corresponding ratios.
-    We need a full fledged function because the relationship between scales and ratios
-    seem to behave exponentially (very small values covering most of the ratio space)
-    """
-    bases = list(range(0,count))
-    max = bases[-1]
-    formula = lambda z: math.exp(z)/math.exp(max)
-    noises = map(formula, bases)
-    return list(noises)
-
 def generate_database(name: str):
     CURRENT_DIR = path.dirname(__file__)
     OUTPUT_DB_FILE = path.join(CURRENT_DIR, f"../assets/{name}.json")
 
     signal_width_values = np.arange(0.5, 24.0, 0.5)
     theoretical_J_values = np.arange(0.5, 12.0, 0.05)
-    noise_scale_values = adjusted_noise_scale_parameters(10)
+    noise_scale_values = np.arange(0.01, 500, 50)
 
     with Pool() as pool:
         parameters = itertools.product(theoretical_J_values, noise_scale_values, signal_width_values)
         parameters = list(parameters)
-        parameters = [random.choice(parameters) for _ in range(50)]#Sampler
+        #parameters = [random.choice(parameters) for _ in range(50)]#Sampler
         print(f"Simulating {len(parameters)} different signals")
 
         signals_db_asy = pool.imap_unordered(wrapper, parameters)
