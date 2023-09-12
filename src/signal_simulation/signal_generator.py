@@ -5,6 +5,7 @@ import random
 from typing import List, Tuple
 
 import numpy as np
+from numpy.polynomial import Polynomial
 from nmrsim import Multiplet
 from nmrsim.math import add_lorentzians
 from scipy.signal import argrelextrema
@@ -20,7 +21,7 @@ class SimulatedSignal:
     The goal of this class is to act as a single instance for the Neural net training.
     """
 
-    def __init__(self, theoretical_J: float, calculated_J: float, JDoubling_error: float, has_harmonic:bool, sub_harmonic: float, hertz_distance: float, signal_noise_ratio: float, signal_width: float):
+    def __init__(self, theoretical_J: float, calculated_J: float, JDoubling_error: float, has_harmonic:bool, sub_harmonic: float, hertz_distance: float, signal_noise_ratio: float, signal_width: float, ssim: float):
         self.theoretical_J = theoretical_J
         "J value passed as input into the simulation"
         self.calculated_J = calculated_J
@@ -39,6 +40,8 @@ class SimulatedSignal:
         "Signal to noise ratio (Passed as input into simulation)"
         self.signal_width = signal_width
         "Width of the signal in hertz"
+        self.ssim = ssim
+        "Structural similarity index, measures how similar the overall signal is after noising and flattening"
     
     def __str__(self) -> str:
         return f"""
@@ -50,7 +53,8 @@ has_harmonic:{self.has_harmonic},
 sub harmonic:{self.sub_harmonic},
 hertz distance:{self.hertz_distance},
 signal to noise:{self.signal_noise_ratio},
-signal width:{self.signal_width}
+signal width:{self.signal_width},
+ssim:{self.ssim}
 """
 
     def __repr__(self) -> str:
@@ -70,7 +74,8 @@ signal width:{self.signal_width}
             source["sub_harmonic"],
             source["hertz_distance"],
             source["signal_noise_ratio"],
-            source["signal_width"])
+            source["signal_width"],
+            source["ssim"])
 
 
 def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_width:float ) -> SimulatedSignal:
@@ -81,13 +86,11 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
 
     #Simulating instrumental noise and subsequent flattening
     signal = simulate_old_noise(base_signal, noise_scale)
+    signal = simulate_non_flat_defects(signal, noise_scale)
     baseline_flattening(signal)
     _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, signal.y_values - base_signal.y_values)
 
-    plt.plot(base_signal.x_values, base_signal.y_values, color='#ff0000')
-    plt.plot(signal.x_values, signal.y_values, color='#00ffff')
-    plt.show()
-    print(structural_similarity_index(signal, base_signal))
+    ssim = structural_similarity_index(signal, base_signal)
 
     # 1.3 is meant to reduce the amount of operations during integration.
     intervalo = int((theoretical_J / signal.gap) * 1.3)
@@ -111,7 +114,7 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
         subarmosHz = subarmos * signal.gap
         has_harmonic = True
 
-    return SimulatedSignal(theoretical_J, calculated_J, theoretical_J - calculated_J, has_harmonic, subarmosHz, calculated_J - subarmosHz, signal_noise_ratio, signal_width)
+    return SimulatedSignal(theoretical_J, calculated_J, theoretical_J - calculated_J, has_harmonic, subarmosHz, calculated_J - subarmosHz, signal_noise_ratio, signal_width, ssim)
 
 # The amount of sample points that we take from the simulated signal
 RESOLUTION_POINTS = 1000
@@ -200,6 +203,26 @@ def simulate_old_noise(signal: Signal, noise_scale:float) -> Signal:
 
     new_y = np.add(signal.y_values, new_y_vals)
     return Signal(new_y, signal.min_hertz, signal.max_hertz)
+
+def simulate_non_flat_defects(signal: Signal, noise_scale: float) -> Signal:
+    """We simulate the kinds of shapes NMR signals can take in non-ideal conditions
+
+    This function combined with simulate_old_noise should turn a perfect theoretial
+    signal into one that could have been plausibly produced by a real instrument.
+    """
+    try:
+        degree = random.randrange(5)+1
+        max_height = max(signal.y_values)
+        points_x = random.choices(signal.x_values, k=degree)
+        points_y = [random.random()*max_height for x in points_x]
+        curve = Polynomial.fit(points_x, points_y, degree)
+        new_y_values = []
+        for i in range(len(signal.x_values)):
+            new_y_values.append(curve(signal.x_values[i]) + signal.y_values[i])
+        return Signal(new_y_values, signal.min_hertz, signal.max_hertz)
+    except Exception as e:
+        # The polynomial fit can fail
+        return signal
 
 def structural_similarity_index(measured_signal: Signal, simulated_signal: Signal) -> float:
     """Gives a measure of the uniformity of the spectrum as compared to a simulated measurement
