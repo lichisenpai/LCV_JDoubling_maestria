@@ -149,7 +149,7 @@ def calculate_noise(original:List[float], noise:List[float]) -> Tuple[float, flo
     prom = sum(noise)/len(noise)
     msex = list(map(lambda x: np.square(x - prom), noise))
     mse = sum(msex)/(len(noise) - 1)
-    rmse = pow(mse, 0.5) #la raiz cuadrada del anterior
+    rmse = pow(mse, 0.5) #equivalent to standard deviation
     maxim = max(original)# nos da el maximo de la simulacion original
     s_n = float('inf') if rmse == 0 else maxim / rmse#relacion señal ruido
     return mse, rmse, s_n
@@ -215,7 +215,7 @@ def simulate_non_flat_defects(signal: Signal, noise_scale: float) -> Signal:
         max_height = max(signal.y_values)
         points_x = random.choices(signal.x_values, k=degree)
         points_y = [random.random()*max_height for x in points_x]
-        curve = Polynomial.fit(points_x, points_y, degree)
+        curve = Polynomial.fit(points_x, points_y, degree+2)
         new_y_values = []
         for i in range(len(signal.x_values)):
             new_y_values.append(curve(signal.x_values[i]) + signal.y_values[i])
