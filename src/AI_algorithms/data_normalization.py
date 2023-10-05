@@ -42,6 +42,10 @@ class Normalizer:
         self.std = std
         
     def normalize_row(self, r):
+        """Apply standardization to the rows values, based on the training dataset
+        
+        Pass as input a dataframe with a single row
+        """
         new_row = copy.deepcopy(r)
         for col in r:
             if self.std[col] != 0:

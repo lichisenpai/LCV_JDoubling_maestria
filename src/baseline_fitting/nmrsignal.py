@@ -34,7 +34,7 @@ class Signal:
             for i in range(0, tam):
                 yy[i] = (float(contenido[i+3]))
             
-            return Signal(yy, float(a), float(b))
+            return Signal(yy, float(b), float(a))
 
 def gen_random_signal(point_count, min_start_height, max_start_height, min_jump, max_jump):
     """Generates a random signal that looks like an nmr produced signal"""

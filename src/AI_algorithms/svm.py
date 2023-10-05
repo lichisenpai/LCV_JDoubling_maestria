@@ -30,7 +30,13 @@ class JdoublingReliabilityPredictor:
         self.svm = load_svm_model()
     
     def predict(self, signal_noise_ratio: float, calculated_j: float) -> float:
-        vals = self.svm.predict([[signal_noise_ratio, calculated_j]])
+        row = {
+            "signal_noise_ratio": [signal_noise_ratio],
+            "calculated_J": [calculated_j]
+        }
+        row = pd.DataFrame(data=row)
+
+        vals = self.svm.predict(row)
         return vals[0]
 
 if __name__ == "__main__":

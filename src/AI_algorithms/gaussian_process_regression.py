@@ -34,10 +34,18 @@ class JdoublingResultPredictor:
 
     def predict(self, signal_width: float, subharmonic: float, hertz_distance: float, signal_noise_ratio: float) -> float:
         row = [signal_width, subharmonic, hertz_distance, signal_noise_ratio]
+
+        row = {
+            "signal_width": [signal_width],
+            "sub_harmonic": [subharmonic],
+            "hertz_distance": [hertz_distance],
+            "signal_noise_ratio": [signal_noise_ratio]
+        }
+        row = pd.DataFrame(data=row)
+
         normalized_input = self.normalizer.normalize_row(row)
-        #NOTE: strong chances that I'll have to call np reshape on the list below
-        reduced_dimensions = self.pls_model.predict(normalized_input)
-        return self.gpr_model.predict(reduced_dimensions)
+        reduced_dimensions = self.pls_model.transform(normalized_input)
+        return self.gpr_model.predict_f_compiled(reduced_dimensions)
         
 if __name__ == "__main__":
     dataset = normalize_training_data(INPUT_DB)

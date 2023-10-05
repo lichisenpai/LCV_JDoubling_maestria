@@ -87,7 +87,9 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
     #Simulating instrumental noise and subsequent flattening
     signal = simulate_old_noise(base_signal, noise_scale)
     signal = simulate_non_flat_defects(signal, noise_scale)
+    plt.plot(signal.x_values, signal.y_values, color='#cccccc')
     baseline_flattening(signal)
+    plt.plot(signal.x_values, signal.y_values, color='#ffaa00')
     _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, signal.y_values - base_signal.y_values)
 
     ssim = structural_similarity_index(signal, base_signal)
@@ -222,6 +224,7 @@ def simulate_non_flat_defects(signal: Signal, noise_scale: float) -> Signal:
         return Signal(new_y_values, signal.min_hertz, signal.max_hertz)
     except Exception as e:
         # The polynomial fit can fail
+        print("failed fitting")
         return signal
 
 def structural_similarity_index(measured_signal: Signal, simulated_signal: Signal) -> float:

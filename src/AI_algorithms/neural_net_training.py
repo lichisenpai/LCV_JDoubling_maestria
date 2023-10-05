@@ -37,8 +37,20 @@ class JdoublingErrorPredictor:
    
     def predict(self, calculated_j:float, signal_width: float, sub_harmonic: float, hertz_distance: float, signal_noise_ratio: float) -> float:
         row = [calculated_j, signal_width, sub_harmonic, hertz_distance, signal_noise_ratio]
+
+        row = {
+            "calculated_J":[calculated_j],
+            "signal_width":[signal_width],
+            "sub_harmonic":[sub_harmonic],
+            "hertz_distance":[hertz_distance],
+            "signal_noise_ratio":[signal_noise_ratio]
+        }
+        row = pd.DataFrame(data=row)
+
         normalized_input = self.normalizer.normalize_row(row)
-        reduced_dimensions = self.pls_model.predict(normalized_input)
+        #print(normalized_input)
+        reduced_dimensions = self.pls_model.transform(normalized_input)
+        #print(reduced_dimensions)
         return self.neural_net_fwd_pass.serve(reduced_dimensions)
 
 if __name__ == "__main__":

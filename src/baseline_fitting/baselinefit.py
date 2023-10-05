@@ -32,7 +32,7 @@ def filter_within_bounds(values, lower, upper):
     """Returns a list where all the values are within the upper and lower bound"""
     return list( filter( lambda x: x > lower and x < upper, values))
 
-def baseline_flattening(source: Signal):
+def baseline_flattening(source: Signal, polynomials=8):
     """Flatten a given signal
 
     Denoises/Normalizes a given signal
@@ -51,7 +51,7 @@ def baseline_flattening(source: Signal):
         # fitting curve
         points_within_v = zip(source.x_values, source.y_values)
         points_within_v = list(filter(lambda p: p[1] > -V_PARAMETER*old_sigma and p[1] < V_PARAMETER*old_sigma, points_within_v))
-        fitted_polynomial = Polynomial.fit([p[0] for p in points_within_v], [p[1] for p in points_within_v], 8)
+        fitted_polynomial = Polynomial.fit([p[0] for p in points_within_v], [p[1] for p in points_within_v], polynomials)
         # Substracting fitted curve to original signal
         source.y_values = list(map(lambda i: source.y_values[i] - fitted_polynomial(source.x_values[i]), range(0, len(source.y_values))))
         # Deciding if the correction was negligible
