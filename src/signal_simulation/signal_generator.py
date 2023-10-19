@@ -21,7 +21,17 @@ class SimulatedSignal:
     The goal of this class is to act as a single instance for the Neural net training.
     """
 
-    def __init__(self, theoretical_J: float, calculated_J: float, JDoubling_error: float, has_harmonic:bool, sub_harmonic: float, hertz_distance: float, signal_noise_ratio: float, signal_width: float, ssim: float):
+    def __init__(self,
+                 theoretical_J: float,
+                 calculated_J: float,
+                 JDoubling_error: float,
+                 has_harmonic:bool,
+                 sub_harmonic: float,
+                 hertz_distance: float,
+                 signal_noise_ratio: float,
+                 signal_width: float,
+                 ssim: float,
+                 noise_scale:float):
         self.theoretical_J = theoretical_J
         "J value passed as input into the simulation"
         self.calculated_J = calculated_J
@@ -42,6 +52,8 @@ class SimulatedSignal:
         "Width of the signal in hertz"
         self.ssim = ssim
         "Structural similarity index, measures how similar the overall signal is after noising and flattening"
+        self.noise_scale = noise_scale
+        "Input noise scale, necesarry to replicate this signal simulation later"
     
     def __str__(self) -> str:
         return f"""
@@ -54,7 +66,8 @@ sub harmonic:{self.sub_harmonic},
 hertz distance:{self.hertz_distance},
 signal to noise:{self.signal_noise_ratio},
 signal width:{self.signal_width},
-ssim:{self.ssim}
+ssim:{self.ssim},
+noise_scale:{self.noise_scale}
 """
 
     def __repr__(self) -> str:
@@ -75,7 +88,8 @@ ssim:{self.ssim}
             source["hertz_distance"],
             source["signal_noise_ratio"],
             source["signal_width"],
-            source["ssim"])
+            source["ssim"],
+            source["noise_scale"])
 
 
 def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_width:float ) -> SimulatedSignal:
@@ -86,10 +100,6 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
 
     #Simulating instrumental noise and subsequent flattening
     signal = simulate_old_noise(base_signal, noise_scale)
-    signal = simulate_non_flat_defects(signal, noise_scale)
-    plt.plot(signal.x_values, signal.y_values, color='#cccccc')
-    baseline_flattening(signal)
-    plt.plot(signal.x_values, signal.y_values, color='#ffaa00')
     _mse, _rmse, signal_noise_ratio = calculate_noise(base_signal.y_values, signal.y_values - base_signal.y_values)
 
     ssim = structural_similarity_index(signal, base_signal)
@@ -116,7 +126,17 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
         subarmosHz = subarmos * signal.gap
         has_harmonic = True
 
-    return SimulatedSignal(theoretical_J, calculated_J, theoretical_J - calculated_J, has_harmonic, subarmosHz, calculated_J - subarmosHz, signal_noise_ratio, signal_width, ssim)
+    return SimulatedSignal(
+        theoretical_J,
+        calculated_J,
+        theoretical_J - calculated_J,
+        has_harmonic,
+        subarmosHz,
+        calculated_J - subarmosHz,
+        signal_noise_ratio,
+        signal_width,
+        ssim,
+        noise_scale)
 
 # The amount of sample points that we take from the simulated signal
 RESOLUTION_POINTS = 1000

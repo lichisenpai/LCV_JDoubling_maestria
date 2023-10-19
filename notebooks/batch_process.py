@@ -12,6 +12,7 @@ from os import path
 import sys
 from typing import List, Tuple
 
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import argrelextrema
@@ -26,7 +27,22 @@ from baseline_fitting.baselinefit import Signal, baseline_flattening
 
 #%% Input, experimental signals
 signal_paths = [
-    "../assets/SeñalesExperimentales/ha_15.slc"
+    "../assets/SeñalesExperimentales/ha_04.slc",
+    "../assets/SeñalesExperimentales/ha_07.slc",
+    "../assets/SeñalesExperimentales/ha_09.slc",
+    "../assets/SeñalesExperimentales/ha_12.slc",
+    "../assets/SeñalesExperimentales/ha_15.slc",
+    "../assets/SeñalesExperimentales/ha_19.slc",
+    "../assets/SeñalesExperimentales/ha_22.slc",
+    "../assets/SeñalesExperimentales/ha_24.slc",
+    "../assets/SeñalesExperimentales/ha_06.slc",
+    "../assets/SeñalesExperimentales/ha_08.slc",
+    "../assets/SeñalesExperimentales/ha_10.slc",
+    "../assets/SeñalesExperimentales/ha_13.slc",
+    "../assets/SeñalesExperimentales/ha_17.slc",
+    "../assets/SeñalesExperimentales/ha_21.slc",
+    "../assets/SeñalesExperimentales/ha_23.slc",
+    "../assets/SeñalesExperimentales/ha_25.slc"
 ]
 
 #%% Jdoubling def
@@ -157,8 +173,8 @@ def run_predictors(jdoub_dict):
     jdoub_dict["predicted_reliability"] = predicted_reliability.item()
 
 #%% Batch run
-rows = []
 
+rows = []
 # read the signals
 for p in signal_paths:
     rows.append( {"path": p, "signal": Signal.leer_archivo(p)} )
@@ -187,6 +203,17 @@ for r in rows:
     run_predictors(r)
 
 #%% Save rows
+# store the plots for the signal
+for r in rows:
+    filename = path.basename(r["path"])
+    filename = filename.split('.')[0]
+    was_flattened = "flat" if r["flattened"] else "not_flat"
+
+    sig = r["signal"]
+    plt.plot(sig.x_values, sig.y_values)
+    plt.savefig(path.join(path.dirname(__file__), f"../assets/_plots-señales-experimentales/{filename}-{was_flattened}.png"))
+    plt.clf()
+
 # strip the signal from the row
 for r in rows:
     if "signal" in r:
