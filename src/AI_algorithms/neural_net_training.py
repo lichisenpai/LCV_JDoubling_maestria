@@ -13,7 +13,7 @@ from tensorflow.keras import layers
 from data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/example_db.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/old_noise-no_flat.json")
 PLS_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/nn-dimensional-projection.pkl")
 NEURAL_NET_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/lichi-net.keras")
 
@@ -48,10 +48,10 @@ class JdoublingErrorPredictor:
         row = pd.DataFrame(data=row)
 
         normalized_input = self.normalizer.normalize_row(row)
-        #print(normalized_input)
         reduced_dimensions = self.pls_model.transform(normalized_input)
-        #print(reduced_dimensions)
-        return self.neural_net_fwd_pass.serve(reduced_dimensions)
+        result = self.neural_net_fwd_pass.serve(reduced_dimensions).numpy()[0,0]
+        result = self.normalizer.denormalize_row({"Jdoubling_error": result})
+        return result["Jdoubling_error"]
 
 if __name__ == "__main__":
     dataset = normalize_training_data(INPUT_DB)

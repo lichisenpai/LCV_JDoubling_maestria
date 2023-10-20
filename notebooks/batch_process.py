@@ -14,8 +14,8 @@ from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.interpolate import UnivariateSpline
-from scipy.signal import argrelextrema
+    from scipy.interpolate import UnivariateSpline
+    from scipy.signal import argrelextrema
 import tensorflow as tf
 
 modules_path = path.join(path.dirname(__file__), '../src')

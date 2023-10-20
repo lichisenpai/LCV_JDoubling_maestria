@@ -12,7 +12,7 @@ import tensorflow as tf
 from data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/example_db.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/old_noise-no_flat.json")
 PLS_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/gpr-dimensional-projection.pkl")
 GPR_MODEL_DIR = path.join(CURRENT_DIR, "udata/lichi-gpr/")
 
@@ -45,7 +45,13 @@ class JdoublingResultPredictor:
 
         normalized_input = self.normalizer.normalize_row(row)
         reduced_dimensions = self.pls_model.transform(normalized_input)
-        return self.gpr_model.predict_f_compiled(reduced_dimensions)
+        prediction = self.gpr_model.predict_f_compiled(reduced_dimensions)
+        (predicted_J, variance) = tf.get_static_value(prediction)
+        #extract from tensor    
+        (predicted_J, variance) = (predicted_J.numpy()[0,0], variance.numpy()[0,0])
+        predicted_J = self.normalizer.denormalize_row({"calculated_J": predicted_J})
+        predicted_J = predicted_J["calculated_J"]
+        return (predicted_J, variance)
         
 if __name__ == "__main__":
     dataset = normalize_training_data(INPUT_DB)

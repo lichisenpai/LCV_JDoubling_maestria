@@ -51,3 +51,12 @@ class Normalizer:
             if self.std[col] != 0:
                 new_row[col] = (r[col] - self.mean[col])/self.std[col]
         return new_row
+    
+    def denormalize_row(self, r):
+        """Return the value from their normalized space to their original oness"""
+        new_row = copy.deepcopy(r)
+        for col in r:
+            if self.std[col] != 0:
+                #quite literally the inverse of standardization
+                new_row[col] = r[col]*self.std[col] + self.mean[col]
+        return new_row
