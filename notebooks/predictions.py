@@ -17,7 +17,7 @@ sys.path.append(modules_path)
 from baseline_fitting.baselinefit import Signal, baseline_flattening
 
 #%% Reading a slc signal
-sig = Signal.leer_archivo("../assets/SeñalesExperimentales/ha_15.slc")
+sig = Signal.leer_archivo("../assets/SeñalesExperimentales/CYS_08_maslarga.slc")
 
 # %%
 #MOVE TO ANOTHER FILE LATER
@@ -120,10 +120,11 @@ plt.show()
 busqueda = int(intervalo/8)
 minimosR = argrelextrema(integrs, np.less, order=busqueda, mode= 'wrap')[0]#busca el minimo mas minimo
 minimos = argrelextrema(integrs, np.less, mode='wrap')[0] #me da todos los minimos con ruido
-armonic1 = int((minimosR[-1])/3)  
+print(minimos)
+armonic1 = int((minimos[-1])/3)  
 subarmos= harmonics(armonic1, minimos)
 
-Jota = minimosR[-1] * sig.gap
+Jota = minimos[-1] * sig.gap
 distance = Jota - (subarmos * sig.gap)
 #Jota, s_n
 
@@ -136,7 +137,7 @@ print("Relación señal/ruido: ", s_n)
 
 # %%
 from AI_algorithms.neural_net_training import JdoublingErrorPredictor
-from AI_algorithms.gaussian_process_regression import JdoublingResultPredictor
+from AI_algorithms.gpr_theoretical_j import JdoublingResultPredictor
 from AI_algorithms.svm import JdoublingReliabilityPredictor
 
 result_predictor = JdoublingResultPredictor()
@@ -145,7 +146,7 @@ predicted_j = tf.get_static_value(predicted_j)
 print(f"GPR prediction: Predicts a J value of {predicted_j}")
 
 error_predictor = JdoublingErrorPredictor()
-predicted_error = error_predictor.predict(Jota, w, subarmos*sig.gap, distance, s_n).numpy()
+predicted_error = error_predictor.predict(Jota, w, subarmos*sig.gap, distance, s_n)
 print(f"Neural net prediction: Predicts Jdoubling error of {predicted_error}")
 
 reliability_predictor = JdoublingReliabilityPredictor()

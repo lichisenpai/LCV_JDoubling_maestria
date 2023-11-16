@@ -43,6 +43,12 @@ def untool(signal, flat_rad=1):
     reduced_max_hertz = signal.max_hertz - signal.gap*og_len*flat_rad
     return Signal(reduced_y, reduced_min_hertz, reduced_max_hertz)
 
+def reseat(signal):
+    "Resets the signal around the horizontal axis. Mutates."
+    vertical_adjust = 0 - signal.y_values[0]
+    for i,_ in enumerate(signal.y_values):
+        signal.y_values[i] += vertical_adjust
+
 
 plt.plot(signal.x_values, signal.y_values, color='#ff0000')
 plt.show()
@@ -102,6 +108,7 @@ def evaluate(signal_paths, poly_deg, flat_rad):
         moded = retool(s, flat_rad)
         baseline_flattening(s, poly_deg)
         moded = untool(moded, flat_rad)
+        reseat(moded)
 
         base_slope = signal_slope(s)
         res_slope = signal_slope(moded)
