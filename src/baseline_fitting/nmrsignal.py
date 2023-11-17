@@ -3,6 +3,10 @@
 import random
 import numpy as np
 
+def ppm_to_hz(ppm:float, frequency_mhz:float) -> float:
+    "Convert values from ppm to Hz produced by nmr"
+    return ppm*frequency_mhz / 10**6
+
 class Signal:
     """Represents an NMR signal"""
 
@@ -35,6 +39,26 @@ class Signal:
                 yy[i] = (float(contenido[i+3]))
             
             return Signal(yy, float(b), float(a))
+    
+    @staticmethod
+    def read_file_mnova_csv(filename, frequency_mhz):
+        """Reads a sgnal generated using the mnvoa export as nmr csvv option"""
+        with open(filename, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            xy_pairs = []
+            for l in lines:
+                (xs, ys) = l.split()
+                (x,y) = (float(xs), float(ys))
+                xy_pairs.append((ppm_to_hz(x, frequency_mhz),y))
+        
+        # A rather untasteful unzip
+        (x_values, y_values) = zip(*xy_pairs)
+        x_values = list(x_values)
+        y_values = list(y_values)
+
+        sig = Signal(y_values, x_values[0], x_values[-1])
+        sig.x_values = x_values
+        return sig            
 
 def gen_random_signal(point_count, min_start_height, max_start_height, min_jump, max_jump):
     """Generates a random signal that looks like an nmr produced signal"""
