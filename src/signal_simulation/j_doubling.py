@@ -1,40 +1,35 @@
 """The J Doubling algorithm"""
 
 import math
-from typing import List, Tuple
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import argrelextrema
 
+import matplotlib.pyplot as plt
 
-def aplicar(x:List[float], y:List[float], start_index:int) -> List[float]:
-    """Add the values from list y to list x starting at the position start_index. Return a new list.
-    
-    len(x) must be the len(y) + start_index
-    """
+def convolucion(y_vals, n=40, delta_count=128):
+    "Convolution between the delta functions and the signal"
+    result = np.zeros(len(y_vals) + n*delta_count)
+    for i in range(delta_count):
+        if i < delta_count //2:
+            qq = (-1)**i*y_vals
+        else:
+            qq = (-1)**(i+1)*y_vals
 
-    result = np.copy(x)
-    for i in range(0, len(y)):
-        result[start_index + i] += y[i]
+        for j,y in enumerate(qq):
+            result[n*i +j] += qq[j]
     return result
 
-def convolucion(yy:List[float], n:int = 40, m:int = 128) -> List[float]:
-    "convolution :)"
-    tamano = len(yy)
-    ceros = np.zeros(tamano+n*m)
+kow_tools = {}
 
-    for i in range(0, m):
-
-        ceros = aplicar(ceros, (-1)**i*yy, n*i)
-    return ceros
-
-def jdoubling(yy:List[float], intervalo:int = 60, m:int = 8):
+def jdoubling(yy, intervalo:int = 60, m:int = 8):
     "The jdoubling process itself"
     
     integrs = np.zeros(intervalo)
     for i in range(1, intervalo):
         y_new = convolucion(yy, i, m)
+        kow_tools[str(i)] = y_new
         integral = sum(abs(y_new))
         integrs[i] = integral
     return integrs
@@ -49,11 +44,11 @@ def det_width (xx, yy):
     w = r2-r1
     return w, r1, r2
 
-def calculate_noise(y_values:List[float]) -> float:
+def calculate_noise(y_values) -> float:
     "Calculate signal to noise ratio using technique from DESPERATE"
     return np.max(y_values)/np.std(y_values)
 
-def harmonics(expected_first_harmonic:float, minimums:List[float]) -> float:
+def harmonics(expected_first_harmonic:float, minimums) -> float:
     "determine which minimum fits the first harmonic"
     
     candidates = [expected_first_harmonic + x for x in range(-2,3)]
@@ -93,3 +88,9 @@ def calculate_jdoubling_properties(chosen_candidate, minimums, sig):
         "has_harmonic": False if subarmos == None else True,
         "sub_harmonic": subharmonic
     }
+
+def jdoubling_default_choice(sig):
+    (integrals, minimums) = jdoubling_process(sig)
+    plt.plot(range(len(integrals)), integrals)
+    print(minimums)
+    return calculate_jdoubling_properties(minimums[-1], minimums, sig)
