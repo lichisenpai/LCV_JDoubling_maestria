@@ -2,10 +2,9 @@ import pickle
 from os import path
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.cross_decomposition import PLSRegression, PLSSVD
+from sklearn.cross_decomposition import PLSRegression
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -97,7 +96,8 @@ if __name__ == "__main__":
     ## Training----------
     class PrintDot(keras.callbacks.Callback):
       def on_epoch_end(self, epoch, logs):
-        if epoch % 100 == 0: print('')
+        if epoch % 100 == 0:
+            print('')
         print('.', end='')
     
     EPOCHS = 500

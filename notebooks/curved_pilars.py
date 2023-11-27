@@ -1,5 +1,4 @@
 #%% 1 setup
-import copy
 from os import path
 import sys
 
@@ -9,7 +8,6 @@ import pandas as pd
 
 modules_path = path.join(path.dirname(__file__), '../src')
 sys.path.append(modules_path)
-from signal_simulation.signal_generator import simulate_single_signal
 
 CURRENT_DIR = path.dirname(__file__)
 OLD_NOISE_NOFLAT_SCALES = path.join(CURRENT_DIR, '../assets/training-databases/old_noise-no_flat-scales.json')

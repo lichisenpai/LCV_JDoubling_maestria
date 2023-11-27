@@ -1,8 +1,10 @@
-# Given a set of experimental signals:
-# Process and predict all of them
-# - with and  without baseline fitting
-# - Jdoubling
-# - AI algorithmic predictions
+"""
+Given a set of experimental signals:
+Process and predict all of them
+- with and  without baseline fitting
+- Jdoubling
+- AI algorithmic predictions
+"""
 
 #%% Setup
 import copy
@@ -148,7 +150,7 @@ def full_jdoubling_process(sig):
         "hertz_distance": distance,
         "signal_width": w,
         "signal_noise_ratio": s_n,
-        "has_harmonic": False if subarmos == None else True,
+        "has_harmonic": False if subarmos is None else True,
         "sub_harmonic": subarmos * sig.gap
     }
 

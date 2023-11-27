@@ -9,10 +9,8 @@ from numpy.polynomial import Polynomial
 from nmrsim import Multiplet
 from nmrsim.math import add_lorentzians
 from scipy.signal import argrelextrema
-from matplotlib import pyplot as plt
 
 from nmrsignal import Signal
-from baselinefit import baseline_flattening
 
 
 class SimulatedSignal:
@@ -118,7 +116,7 @@ def simulate_single_signal(theoretical_J: float, noise_scale: float, signal_widt
     # Searching for the first subharmonic value, we know that it must be around J/3
     armonic1 = int((minimosR[-1])/3)
     subarmos= harmonics(armonic1, minimos)
-    if subarmos == None:
+    if subarmos is None:
         # Could not find first subharmonic
         subarmosHz = 0
         has_harmonic = False
@@ -242,7 +240,7 @@ def simulate_non_flat_defects(signal: Signal, noise_scale: float) -> Signal:
         for i in range(len(signal.x_values)):
             new_y_values.append(curve(signal.x_values[i]) + signal.y_values[i])
         return Signal(new_y_values, signal.min_hertz, signal.max_hertz)
-    except Exception as e:
+    except Exception as _e:
         # The polynomial fit can fail
         print("failed fitting")
         return signal

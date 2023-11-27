@@ -14,7 +14,7 @@ sys.path.append(modules_path)
 modules_path = path.join(path.dirname(__file__), '../src/AI_algorithms')
 sys.path.append(modules_path)
 
-from baseline_fitting.baselinefit import Signal, baseline_flattening
+from nmrsignal import Signal
 
 #%% Reading a slc signal
 sig = Signal.leer_archivo("../assets/señales-experimentales/CYS_08_maslarga.slc")

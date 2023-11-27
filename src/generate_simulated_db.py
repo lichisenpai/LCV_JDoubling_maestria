@@ -1,5 +1,4 @@
 import numpy as np
-from tqdm import tqdm
 
 import itertools
 import json
@@ -9,7 +8,7 @@ from os import path
 import random
 import sys
 
-from signal_generator import SimulatedSignal, simulate_single_signal
+from signal_generator import simulate_single_signal
 
 def wrapper(args):
     "Wrap simulate_single_signal call cause there is no istarmap_unordered"

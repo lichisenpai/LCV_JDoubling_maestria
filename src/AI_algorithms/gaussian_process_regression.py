@@ -2,9 +2,7 @@ from os import path
 import pickle
 
 import pandas as pd 
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.cross_decomposition import PLSRegression, PLSSVD
+from sklearn.cross_decomposition import PLSRegression
 import gpflow
 from gpflow.utilities import print_summary
 import tensorflow as tf
