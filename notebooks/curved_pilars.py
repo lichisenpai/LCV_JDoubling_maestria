@@ -12,8 +12,9 @@ sys.path.append(modules_path)
 from signal_simulation.signal_generator import simulate_single_signal
 
 CURRENT_DIR = path.dirname(__file__)
-OLD_NOISE_NOFLAT_SCALES = path.join(CURRENT_DIR, '../assets/old_noise-noflat-scales.json')
-OG_RENAMED = path.join(CURRENT_DIR, '../assets/original-renamed.json')
+OLD_NOISE_NOFLAT_SCALES = path.join(CURRENT_DIR, '../assets/training-databases/old_noise-no_flat-scales.json')
+# try old_noise-no_flat to see a bigger curved pillar effect
+OG_RENAMED = path.join(CURRENT_DIR, '../assets/training-databases/original-renamed.json')
 data = pd.read_json(OLD_NOISE_NOFLAT_SCALES)
 og = pd.read_json(OG_RENAMED)
 
@@ -152,10 +153,10 @@ ax.scatter(data["noise_scale"], data["signal_noise_ratio"], data["signal_width"]
 ax.view_init(45,45,45)
 plt.show()
 #%% 8 Does the bigger dataset "erase" the columns
-BIGGER_DATASET = path.join(CURRENT_DIR, '../assets/old_noise-no_flat-scales-bigger.json')
+BIGGER_DATASET = path.join(CURRENT_DIR, '../assets/training-databases/old_noise-no_flat-scales-bigger.json')
 bigger = pd.read_json(BIGGER_DATASET)
 add_cond_columns(bigger)
-TUNNED_DATASET = path.join(CURRENT_DIR, '../assets/morescales-lesswidths.json')
+TUNNED_DATASET = path.join(CURRENT_DIR, '../assets/training-databases/morescales-lesswidths.json')
 tunned = pd.read_json(TUNNED_DATASET)
 add_cond_columns(tunned)
 

@@ -11,7 +11,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/old_noise-no_flat.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/trainning-databases/old_noise-no_flat.json")
 SVM_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/svm-model.pkl")
 
 

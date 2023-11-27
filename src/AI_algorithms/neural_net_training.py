@@ -13,7 +13,7 @@ from tensorflow.keras import layers
 from data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/old_noise-no_flat.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/training-databases/old_noise-no_flat.json")
 PLS_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/nn-dimensional-projection.pkl")
 NEURAL_NET_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/lichi-net.keras")
 

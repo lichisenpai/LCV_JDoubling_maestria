@@ -1,0 +1,13 @@
+example_db          <- Example of database used for trainning
+original            <- Database use to train AI models for bachelors degree
+original-renamed    <- Original database but with the column names we actually use
+
+morescales-lesswidths   <- Database with same size but higher resolution in noise scales.
+    We used this while researching the curved-columns that appeared on SNR vs calculated J
+new_noise-flat      <- Generated using a random signal and then flattened with algorithm (useless)
+old_noise-flat      <- Generated adding random noise to each point on original signal and then flattened (useless)
+old_noise-no_flat   <- Adding random noise to each point, not flattened (closest to original)
+old_noise-no_flat-scales    <- Produced by extending noise_scale, older noise, not flattened
+
+old-curved-flat     <- old noise, simpler flattening (useless)
+old-flat-prevsnr    <- old noise, using previous snr calculation. Not different enough from old_noise-no_flat

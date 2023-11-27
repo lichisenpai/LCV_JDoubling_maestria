@@ -11,8 +11,8 @@ from nmrsim.math import add_lorentzians
 from scipy.signal import argrelextrema
 from matplotlib import pyplot as plt
 
-from baseline_fitting.nmrsignal import Signal, gen_random_signal
-from baseline_fitting.baselinefit import baseline_flattening
+from nmrsignal import Signal
+from baselinefit import baseline_flattening
 
 
 class SimulatedSignal:
