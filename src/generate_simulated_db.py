@@ -37,7 +37,7 @@ def generate_database(name: str):
         #parameters = [random.choice(parameters) for _ in range(50)]#Sampler
         print(f"Simulating {len(parameters)} different signals")
 
-        signals_db_asy = pool.imap_unordered(wrapper, parameters, 64)
+        signals_db_asy = pool.imap_unordered(wrapper, parameters)
         signals_db = status(signals_db_asy, len(parameters))# Progress bar
         signals_db = pool.map(vars, signals_db)
 
