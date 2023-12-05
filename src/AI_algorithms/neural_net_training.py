@@ -2,10 +2,9 @@ import pickle
 from os import path
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.cross_decomposition import PLSRegression, PLSSVD
+from sklearn.cross_decomposition import PLSRegression
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -13,7 +12,7 @@ from tensorflow.keras import layers
 from data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/old_noise-no_flat.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/training-databases/old_noise-no_flat.json")
 PLS_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/nn-dimensional-projection.pkl")
 NEURAL_NET_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/lichi-net.keras")
 
@@ -97,7 +96,8 @@ if __name__ == "__main__":
     ## Training----------
     class PrintDot(keras.callbacks.Callback):
       def on_epoch_end(self, epoch, logs):
-        if epoch % 100 == 0: print('')
+        if epoch % 100 == 0:
+            print('')
         print('.', end='')
     
     EPOCHS = 500

@@ -1,6 +1,7 @@
 """Represent signals output by an NMR system"""
 
 import random
+
 import numpy as np
 
 def ppm_to_hz(ppm:float, frequency_mhz:float) -> float:

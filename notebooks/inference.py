@@ -14,10 +14,10 @@ sys.path.append(modules_path)
 modules_path = path.join(path.dirname(__file__), '../src/AI_algorithms')
 sys.path.append(modules_path)
 
-from baseline_fitting.baselinefit import Signal, baseline_flattening
+from nmrsignal import Signal
 
 #%% Reading a slc signal
-sig = Signal.leer_archivo("../assets/SeñalesExperimentales/CYS_08_maslarga.slc")
+sig = Signal.leer_archivo("../assets/señales-experimentales/CYS_08_maslarga.slc")
 
 # %%
 #MOVE TO ANOTHER FILE LATER
@@ -137,7 +137,7 @@ print("Relación señal/ruido: ", s_n)
 
 # %%
 from AI_algorithms.neural_net_training import JdoublingErrorPredictor
-from AI_algorithms.gpr_theoretical_j import JdoublingResultPredictor
+from AI_algorithms.gaussian_process_regression import JdoublingResultPredictor
 from AI_algorithms.svm import JdoublingReliabilityPredictor
 
 result_predictor = JdoublingResultPredictor()
