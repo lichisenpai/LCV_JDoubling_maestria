@@ -2,17 +2,15 @@ from os import path
 import pickle
 
 import pandas as pd 
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.cross_decomposition import PLSRegression, PLSSVD
-import gpflow #probablemente tengas que instalarlo manualmente con !pip install gpflow y volver a reiniciar el entorno 
+from sklearn.cross_decomposition import PLSRegression
+import gpflow
 from gpflow.utilities import print_summary
 import tensorflow as tf
 
 from data_normalization import normalize_training_data, Normalizer
 
 CURRENT_DIR = path.dirname(__file__)
-INPUT_DB = path.join(CURRENT_DIR, "../../assets/old_noise-no_flat.json")
+INPUT_DB = path.join(CURRENT_DIR, "../../assets/training-databases/old_noise-no_flat.json")
 PLS_MODEL_FILENAME = path.join(CURRENT_DIR, "udata/gpr-dimensional-projection.pkl")
 GPR_MODEL_DIR = path.join(CURRENT_DIR, "udata/lichi-gpr/")
 

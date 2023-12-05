@@ -1,6 +1,7 @@
 """Represent signals output by an NMR system"""
 
 import random
+
 import numpy as np
 
 class Signal:

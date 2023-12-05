@@ -6,14 +6,14 @@ import numpy as np
 import pandas as pd
 
 CURRENT_DIR = path.dirname(__file__)
+DB_DIR = path.join(CURRENT_DIR, "../assets/training-databases/")
 
-ORIGINAL = path.join(CURRENT_DIR, '../assets/original-renamed.json')
-OLD_NOISE_FLAT = path.join(CURRENT_DIR, '../assets/old_noise-flat.json')
-#OLD_NOISE_NOFLAT = path.join(CURRENT_DIR, '../assets/old_noise-no_flat.json')
-OLD_NOISE_NOFLAT = path.join(CURRENT_DIR, '../assets/old_noise-noflat-scales.json')
-NEW_NOISE_FLAT = path.join(CURRENT_DIR, '../assets/new_noise-flat.json')
-OLD_CURVED_FLAT = path.join(CURRENT_DIR, '../assets/old-curved-flat.json')
-OLD_FLAT_PREVSNR = path.join(CURRENT_DIR, '../assets/old-flat-prevsnr.json')
+ORIGINAL = path.join(DB_DIR, 'original-renamed.json')
+OLD_NOISE_FLAT = path.join(DB_DIR, 'old_noise-flat.json')
+OLD_NOISE_NOFLAT = path.join(DB_DIR, 'old_noise-no_flat-scales.json')
+NEW_NOISE_FLAT = path.join(DB_DIR, 'new_noise-flat.json')
+OLD_CURVED_FLAT = path.join(DB_DIR, 'old-curved-flat.json')
+OLD_FLAT_PREVSNR = path.join(DB_DIR, 'old-flat-prevsnr.json')
 
 db_original = pd.read_json(ORIGINAL)
 db_of = pd.read_json(OLD_NOISE_FLAT)
@@ -83,15 +83,7 @@ plt.show()
 #%% 6 ssim
 plt.plot(range(len(db_ocf["ssim"])), sorted(db_ocf["ssim"]))
 plt.show()
-#%% 7 seaborns db_ocf
-import seaborn as sns
-db_ocf = db_ocf[(db_ocf.ssim <= 0.0 + 0.001)]
-
-niu = niu.sample(1000)
-niu = db_ocf[["theoretical_J","calculated_J","signal_width","signal_noise_ratio","sub_harmonic","JDoubling_error"]]
-
-sns.pairplot(niu.sample(1000))
-plt.show()
 #%% 8 on old-flat compare new & old SNR values
 plt.scatter(db_ofp["prev_snr"], db_ofp["signal_noise_ratio"])
 plt.show()
+# %%

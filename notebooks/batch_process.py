@@ -1,8 +1,10 @@
-# Given a set of experimental signals:
-# Process and predict all of them
-# - with and  without baseline fitting
-# - Jdoubling
-# - AI algorithmic predictions
+"""
+Given a set of experimental signals:
+Process and predict all of them
+- with and  without baseline fitting
+- Jdoubling
+- AI algorithmic predictions
+"""
 
 #%% Setup
 import copy
@@ -14,8 +16,8 @@ from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-    from scipy.interpolate import UnivariateSpline
-    from scipy.signal import argrelextrema
+from scipy.interpolate import UnivariateSpline
+from scipy.signal import argrelextrema
 import tensorflow as tf
 
 modules_path = path.join(path.dirname(__file__), '../src')
@@ -27,22 +29,22 @@ from baseline_fitting.baselinefit import Signal, baseline_flattening
 
 #%% Input, experimental signals
 signal_paths = [
-    "../assets/SeñalesExperimentales/ha_04.slc",
-    "../assets/SeñalesExperimentales/ha_07.slc",
-    "../assets/SeñalesExperimentales/ha_09.slc",
-    "../assets/SeñalesExperimentales/ha_12.slc",
-    "../assets/SeñalesExperimentales/ha_15.slc",
-    "../assets/SeñalesExperimentales/ha_19.slc",
-    "../assets/SeñalesExperimentales/ha_22.slc",
-    "../assets/SeñalesExperimentales/ha_24.slc",
-    "../assets/SeñalesExperimentales/ha_06.slc",
-    "../assets/SeñalesExperimentales/ha_08.slc",
-    "../assets/SeñalesExperimentales/ha_10.slc",
-    "../assets/SeñalesExperimentales/ha_13.slc",
-    "../assets/SeñalesExperimentales/ha_17.slc",
-    "../assets/SeñalesExperimentales/ha_21.slc",
-    "../assets/SeñalesExperimentales/ha_23.slc",
-    "../assets/SeñalesExperimentales/ha_25.slc"
+    "../assets/señales-experimentales/ha_04.slc",
+    "../assets/señales-experimentales/ha_07.slc",
+    "../assets/señales-experimentales/ha_09.slc",
+    "../assets/señales-experimentales/ha_12.slc",
+    "../assets/señales-experimentales/ha_15.slc",
+    "../assets/señales-experimentales/ha_19.slc",
+    "../assets/señales-experimentales/ha_22.slc",
+    "../assets/señales-experimentales/ha_24.slc",
+    "../assets/señales-experimentales/ha_06.slc",
+    "../assets/señales-experimentales/ha_08.slc",
+    "../assets/señales-experimentales/ha_10.slc",
+    "../assets/señales-experimentales/ha_13.slc",
+    "../assets/señales-experimentales/ha_17.slc",
+    "../assets/señales-experimentales/ha_21.slc",
+    "../assets/señales-experimentales/ha_23.slc",
+    "../assets/señales-experimentales/ha_25.slc"
 ]
 
 #%% Jdoubling def
@@ -148,7 +150,7 @@ def full_jdoubling_process(sig):
         "hertz_distance": distance,
         "signal_width": w,
         "signal_noise_ratio": s_n,
-        "has_harmonic": False if subarmos == None else True,
+        "has_harmonic": False if subarmos is None else True,
         "sub_harmonic": subarmos * sig.gap
     }
 
@@ -163,13 +165,14 @@ def run_predictors(jdoub_dict):
     predicted_j = tf.get_static_value(predicted_j)
 
     error_predictor = JdoublingErrorPredictor()
-    predicted_error = error_predictor.predict(jdoub_dict["calculated_J"], jdoub_dict["signal_width"], jdoub_dict["sub_harmonic"], jdoub_dict["hertz_distance"], jdoub_dict["signal_noise_ratio"]).numpy()
+    predicted_error = error_predictor.predict(jdoub_dict["calculated_J"], jdoub_dict["signal_width"], jdoub_dict["sub_harmonic"], jdoub_dict["hertz_distance"], jdoub_dict["signal_noise_ratio"])
 
     reliability_predictor = JdoublingReliabilityPredictor()
     predicted_reliability = reliability_predictor.predict(jdoub_dict["signal_noise_ratio"], jdoub_dict["calculated_J"])
 
-    jdoub_dict["predicted_J"] = tf.get_static_value(predicted_j[0][0])[0]
-    jdoub_dict["predicted_error"] = predicted_error[0][0].item()
+    jdoub_dict["predicted_J"] = predicted_j
+    #jdoub_dict["predicted_error"] = predicted_error[0][0].item()
+    jdoub_dict["predicted_error"] = predicted_error
     jdoub_dict["predicted_reliability"] = predicted_reliability.item()
 
 #%% Batch run
