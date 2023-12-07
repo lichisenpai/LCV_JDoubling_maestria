@@ -6,6 +6,8 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import argrelextrema
 
+from nmrsignal import Signal
+
 
 def convolucion(y_vals, n=40, delta_count=128):
     "Convolution between the delta functions and the signal"
@@ -21,7 +23,6 @@ def convolucion(y_vals, n=40, delta_count=128):
         for j,y in enumerate(qq):
             result[n*i +j] += qq[j]
     return result
-
 
 def jdoubling(yy, intervalo:int = 60, m:int = 8):
     "The jdoubling process itself"
@@ -95,3 +96,18 @@ def jdoubling_default_choice(sig):
     properties = calculate_jdoubling_properties(minimums[-1], minimums, sig)
     properties["integral"] = integrals
     return properties
+
+def signal_deconvolution(sig, jdoubling_properties):
+    "From a signal produces a new signal with the next jdoubling contained in the original"
+
+    deconvolution = convolucion(sig.y_values, jdoubling_properties["chosen_minimum"])
+    # slicing the deconvolution
+    half_original_length = len(sig.y_values)//2
+    mid_point = len(deconvolution)//2 - jdoubling_properties["chosen_minimum"]//2
+    start = mid_point - half_original_length
+    end = mid_point + half_original_length
+
+    extracted_y_values = deconvolution[start:end]*-1
+
+    # Should I assemble a signal object ?
+    return Signal(extracted_y_values, extracted_y_values[-1], extracted_y_values[0])

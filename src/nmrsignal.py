@@ -62,6 +62,17 @@ class Signal:
         sig.x_values = x_values
         return sig            
 
+    def write_file_mnova_csv(self, filename, frequency_mhz):
+        "Write a file in the mnova csv export. Intended for our own use"
+        output_str = ""
+        #not super sure I am managing the frequencies correctly
+        #Also note that the measurements are assumed to be uniform over X
+        for i, val in enumerate(self.y_values):
+            output_str += f"{i*self.gap/frequency_mhz}\t{val*10**6 / frequency_mhz}\t\n"
+        with open(filename, "w") as f:
+            f.write(output_str)
+
+
 def gen_random_signal(point_count, min_start_height, max_start_height, min_jump, max_jump):
     """Generates a random signal that looks like an nmr produced signal"""
     x_coords = list(range(0,point_count))
