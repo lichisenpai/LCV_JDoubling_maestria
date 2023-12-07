@@ -6,11 +6,12 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import argrelextrema
 
-import matplotlib.pyplot as plt
 
 def convolucion(y_vals, n=40, delta_count=128):
     "Convolution between the delta functions and the signal"
-    result = np.zeros(len(y_vals) + n*delta_count)
+    size = len(y_vals)
+    y_vals = np.array(y_vals)
+    result = np.zeros(size + n*delta_count)
     for i in range(delta_count):
         if i < delta_count //2:
             qq = (-1)**i*y_vals
@@ -21,7 +22,6 @@ def convolucion(y_vals, n=40, delta_count=128):
             result[n*i +j] += qq[j]
     return result
 
-kow_tools = {}
 
 def jdoubling(yy, intervalo:int = 60, m:int = 8):
     "The jdoubling process itself"
@@ -29,7 +29,6 @@ def jdoubling(yy, intervalo:int = 60, m:int = 8):
     integrs = np.zeros(intervalo)
     for i in range(1, intervalo):
         y_new = convolucion(yy, i, m)
-        kow_tools[str(i)] = y_new
         integral = sum(abs(y_new))
         integrs[i] = integral
     return integrs
@@ -59,8 +58,8 @@ def harmonics(expected_first_harmonic:float, minimums) -> float:
     return None # CHECK UP ON VALIDITY OF AI 
 
 def jdoubling_process(sig):
-    intervalo = len(sig.y_values) // 4
-    integrs = jdoubling(sig.y_values, intervalo, 164)
+    intervalo = len(sig.y_values)
+    integrs = jdoubling(sig.y_values, intervalo, 128)
     minimos = argrelextrema(integrs, np.less, mode='wrap')[0] #me da todos los minimos con ruido
 
     return (integrs, minimos)
@@ -70,6 +69,7 @@ def calculate_jdoubling_properties(chosen_candidate, minimums, sig):
     subarmos= harmonics(armonic1, minimums)
 
     Jota = chosen_candidate * sig.gap
+    print(f"chosen: {chosen_candidate} gap: {sig.gap}")
     if subarmos is None:
         distance = None
         subharmonic = None
@@ -81,6 +81,7 @@ def calculate_jdoubling_properties(chosen_candidate, minimums, sig):
     s_n = calculate_noise(sig.y_values)
 
     return {
+        "chosen_minimum": chosen_candidate,
         "calculated_J": Jota,
         "hertz_distance": distance,
         "signal_width": w,
@@ -91,6 +92,6 @@ def calculate_jdoubling_properties(chosen_candidate, minimums, sig):
 
 def jdoubling_default_choice(sig):
     (integrals, minimums) = jdoubling_process(sig)
-    plt.plot(range(len(integrals)), integrals)
-    print(minimums)
-    return calculate_jdoubling_properties(minimums[-1], minimums, sig)
+    properties = calculate_jdoubling_properties(minimums[-1], minimums, sig)
+    properties["integral"] = integrals
+    return properties

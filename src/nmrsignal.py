@@ -6,7 +6,7 @@ import numpy as np
 
 def ppm_to_hz(ppm:float, frequency_mhz:float) -> float:
     "Convert values from ppm to Hz produced by nmr"
-    return ppm*frequency_mhz / 10**6
+    return ppm*frequency_mhz / (10**6)
 
 class Signal:
     """Represents an NMR signal"""
@@ -50,14 +50,15 @@ class Signal:
             for l in lines:
                 (xs, ys) = l.split()
                 (x,y) = (float(xs), float(ys))
-                xy_pairs.append((ppm_to_hz(x, frequency_mhz),y))
+                pair = (ppm_to_hz(x, frequency_mhz),y)
+                xy_pairs.append(pair)
         
         # A rather untasteful unzip
         (x_values, y_values) = zip(*xy_pairs)
         x_values = list(x_values)
         y_values = list(y_values)
 
-        sig = Signal(y_values, x_values[0], x_values[-1])
+        sig = Signal(y_values, x_values[0]*10**6, x_values[-1]*10**6)
         sig.x_values = x_values
         return sig            
 
